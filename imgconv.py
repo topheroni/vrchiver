@@ -8,9 +8,7 @@ from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
 logging.getLogger().setLevel(logging.INFO)
-start_string_vrcx = '{"application":"VRCX"'
-folder_origin = r"C:\Users\chris\Pictures\VRChat\\"
-folder = r"C:\Users\chris\MEGA\VRC\VRC paparazzi"
+start_string_vrcx = '{"application":"VRCX"'.encode("utf-8")
 
 
 class Handler(FileSystemEventHandler):
@@ -22,6 +20,14 @@ class Handler(FileSystemEventHandler):
             logging.info(f"New VRChat screenshot: {filename}")
             png_to_jpeg(filename)
             return
+
+
+def img_conv(img_dir: str, img_dest: str) -> None:
+    for dir, subdirs, files in os.walk(img_dir):
+        for file in files:
+            if not file.endswith(".png"):
+                continue
+            path_full = os.path.join(dir, file)
 
 
 def watch_folder():
@@ -44,25 +50,25 @@ def watch_folder():
     return
 
 
-def png_to_jpeg(img_path: str):
-    im = Image.open(img_path)
-    with open(img_path, "rb") as f:
+def png_to_jpeg(path_png: str):
+    img_png = Image.open(path_png)
+    with open(path_png, "rb") as f:
         img_binary = f.read()
-    extract_metadata(img_binary, img_path)
-    filesize_png = os.path.getsize(img_path) // 1000
-    new_path = img_path.replace(".png", ".jpg")
-    im_new = im.convert("RGB")
-    im_new.save(new_path)
-    filesize_new = os.path.getsize(new_path) // 1000
+    extract_metadata(img_binary, path_png)
+    filesize_png = os.path.getsize(path_png) // 1000
+    path_jpg = path_png.replace(".png", ".jpg")
+    img_jpg = img_png.convert("RGB")
+    img_jpg.save(path_jpg)
+    filesize_jpg = os.path.getsize(path_jpg) // 1000
     logging.info(
-        f"filesize for {img_path.split("\\")[-1]} reduced from {filesize_png} KB "
-        f"to {filesize_new} KB ({round((1-filesize_new/filesize_png)*100,2)}%)"
+        f"filesize for {path_png.split("\\")[-1]} reduced from {filesize_png} KB "
+        f"to {filesize_jpg} KB ({round((1-filesize_jpg/filesize_png)*100,2)}%)"
     )
-    os.remove(img_path)
+    os.remove(path_png)
 
 
 def extract_metadata(img_binary: bytes, img_file: str) -> None:
-    metadata_index = img_binary.find(start_string_vrcx.encode())
+    metadata_index = img_binary.find(start_string_vrcx)
     metadata = img_binary[metadata_index : img_binary.find("}]}".encode()) + 3]
     metadata_string = metadata.decode()
     if metadata_index > -1:
@@ -70,6 +76,6 @@ def extract_metadata(img_binary: bytes, img_file: str) -> None:
             json.dump(json.loads(metadata_string), f, indent=2)
 
 
-if __name__ == "__main__":
-    # main()
-    watch_folder()
+# if __name__ == "__main__":
+#     # main()
+#     watch_folder()
