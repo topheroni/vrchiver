@@ -28,29 +28,38 @@ def img_conv(img_dir: str, img_dest: str) -> None:
             if not file.endswith(".png"):
                 continue
             path_full = os.path.join(dir, file)
+            png_to_jpeg(path_full)
 
 
-def watch_folder():
-    handler = Handler()
-    observer = Observer()
-    observer.schedule(
-        handler,
-        path=folder_origin,
-        recursive=True,
-    )
-    observer.start()
-    logging.info("Directory monitoring started")
-    try:
-        while True:
-            time.sleep(5)
-    except KeyboardInterrupt:
-        logging.info("Terminating")
-        observer.stop()
-    observer.join()
-    return
+# TODO implement optional watchdog to auto-compress images
+# def watch_folder():
+#     # TODO pass user provided folder
+#     handler = Handler()
+#     observer = Observer()
+#     observer.schedule(
+#         handler,
+#         path=folder_origin,
+#         recursive=True,
+#     )
+#     observer.start()
+#     logging.info("Directory monitoring started")
+#     try:
+#         while True:
+#             time.sleep(5)
+#     except KeyboardInterrupt:
+#         logging.info("Terminating")
+#         observer.stop()
+#     observer.join()
+#     return
 
 
-def png_to_jpeg(path_png: str):
+def png_to_jpeg(path_png: str, del_original: bool = False) -> None:
+    """Perform the actual conversion.
+
+    Args:
+        path_png (str): full path of the PNG image
+        del_original (bool, optional): whether to delete the original PNG file. Defaults to False.
+    """
     img_png = Image.open(path_png)
     with open(path_png, "rb") as f:
         img_binary = f.read()
@@ -64,10 +73,17 @@ def png_to_jpeg(path_png: str):
         f"filesize for {path_png.split("\\")[-1]} reduced from {filesize_png} KB "
         f"to {filesize_jpg} KB ({round((1-filesize_jpg/filesize_png)*100,2)}%)"
     )
-    os.remove(path_png)
+    if del_original:
+        os.remove(path_png)
 
 
 def extract_metadata(img_binary: bytes, img_file: str) -> None:
+    """Extract VRCX metadata, if it exists, from the screenshot.
+
+    Args:
+        img_binary (bytes): binary string of image contents
+        img_file (str): full image path
+    """
     metadata_index = img_binary.find(start_string_vrcx)
     metadata = img_binary[metadata_index : img_binary.find("}]}".encode()) + 3]
     metadata_string = metadata.decode()
