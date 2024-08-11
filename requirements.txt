@@ -1,2 +1,4 @@
 pillow
 watchdog
+PySide6
+send2trash

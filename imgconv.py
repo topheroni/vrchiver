@@ -4,6 +4,7 @@ import os
 import time
 
 from PIL import Image
+from send2trash import send2trash
 from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
@@ -74,7 +75,7 @@ def png_to_jpeg(path_png: str, del_original: bool = False) -> None:
         f"to {filesize_jpg} KB ({round((1-filesize_jpg/filesize_png)*100,2)}%)"
     )
     if del_original:
-        os.remove(path_png)
+        send2trash(path_png)
 
 
 def extract_metadata(img_binary: bytes, img_file: str) -> None:
