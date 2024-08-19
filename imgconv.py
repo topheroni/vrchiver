@@ -24,7 +24,7 @@ class Handler(FileSystemEventHandler):
 
 
 def img_conv(img_dir: str, img_dest: str) -> None:
-    for dir, subdirs, files in os.walk(img_dir):
+    for dir, _, files in os.walk(img_dir):
         for file in files:
             if not file.endswith(".png"):
                 continue
@@ -86,9 +86,10 @@ def extract_metadata(img_binary: bytes, img_file: str) -> None:
         img_file (str): full image path
     """
     metadata_index = img_binary.find(start_string_vrcx)
-    metadata = img_binary[metadata_index : img_binary.find("}]}".encode()) + 3]
-    metadata_string = metadata.decode()
+    # only if VRCX metadata exists in the image
     if metadata_index > -1:
+        metadata = img_binary[metadata_index : img_binary.find("}]}".encode()) + 3]
+        metadata_string = metadata.decode()
         with open(img_file.replace(".png", ".json"), "w") as f:
             json.dump(json.loads(metadata_string), f, indent=2)
 
