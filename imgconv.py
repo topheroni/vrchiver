@@ -23,8 +23,9 @@ class Handler(FileSystemEventHandler):
             return
 
 
-def img_conv(img_dir: str, img_dest: str) -> None:
-    for dir, _, files in os.walk(img_dir):
+def img_conv(dir_src: str, dir_dest: str) -> None:
+    os.makedirs(dir_dest, exist_ok=True)
+    for dir, _, files in os.walk(dir_src):
         for file in files:
             if not file.endswith(".png"):
                 continue
