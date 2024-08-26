@@ -12,17 +12,6 @@ logging.getLogger().setLevel(logging.INFO)
 start_string_vrcx = '{"application":"VRCX"'.encode("utf-8")
 
 
-class Handler(FileSystemEventHandler):
-    def created(self, event: FileSystemEvent):
-        if event.is_directory:
-            return
-        filename = event.src_path
-        if filename.endswith(".png"):
-            logging.info(f"New VRChat screenshot: {filename}")
-            png_to_jpeg(filename)
-            return
-
-
 def img_conv(dir_src: str, dir_dest: str) -> None:
     os.makedirs(dir_dest, exist_ok=True)
     for dir, _, files in os.walk(dir_src):
@@ -30,32 +19,10 @@ def img_conv(dir_src: str, dir_dest: str) -> None:
             if not file.endswith(".png"):
                 continue
             path_full = os.path.join(dir, file)
-            png_to_jpeg(path_full)
+            png_to_jpeg(path_full, dir_dest)
 
 
-# TODO implement optional watchdog to auto-compress images
-# def watch_folder():
-#     # TODO pass user provided folder
-#     handler = Handler()
-#     observer = Observer()
-#     observer.schedule(
-#         handler,
-#         path=folder_origin,
-#         recursive=True,
-#     )
-#     observer.start()
-#     logging.info("Directory monitoring started")
-#     try:
-#         while True:
-#             time.sleep(5)
-#     except KeyboardInterrupt:
-#         logging.info("Terminating")
-#         observer.stop()
-#     observer.join()
-#     return
-
-
-def png_to_jpeg(path_png: str, del_original: bool = False) -> None:
+def png_to_jpeg(path_png: str, dir_dest: str, del_original: bool = False) -> None:
     """Perform the actual conversion.
 
     Args:
@@ -94,6 +61,38 @@ def extract_metadata(img_binary: bytes, img_file: str) -> None:
         with open(img_file.replace(".png", ".json"), "w") as f:
             json.dump(json.loads(metadata_string), f, indent=2)
 
+
+# class Handler(FileSystemEventHandler):
+#     def created(self, event: FileSystemEvent):
+#         if event.is_directory:
+#             return
+#         filename = event.src_path
+#         if filename.endswith(".png"):
+#             logging.info(f"New VRChat screenshot detected: {filename}")
+#             png_to_jpeg(filename)
+#             return
+
+
+# TODO implement optional watchdog to auto-compress images
+# def watch_folder():
+#     # TODO pass user provided folder
+#     handler = Handler()
+#     observer = Observer()
+#     observer.schedule(
+#         handler,
+#         path=folder_origin,
+#         recursive=True,
+#     )
+#     observer.start()
+#     logging.info("Directory monitoring started")
+#     try:
+#         while True:
+#             time.sleep(5)
+#     except KeyboardInterrupt:
+#         logging.info("Terminating")
+#         observer.stop()
+#     observer.join()
+#     return
 
 # if __name__ == "__main__":
 #     # main()
