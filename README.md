@@ -4,9 +4,10 @@ Convert all VRChat screenshots from .png to .jpg. Mainly for reducing storage si
 
 ## Usage
 
-`cd` to the directory of the cloned repo, and run the following command:
+`cd` to the directory of the cloned repo, and run the following commands. Ideally, install the dependencies in a virtual environment.
 
 ```
+pip install -r requirements.txt
 python app.py -s source_dir [-d destination_dir]
 ```
 
