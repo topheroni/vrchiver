@@ -4,7 +4,7 @@ import os
 from imgconv import img_conv
 
 
-def main(args: argparse.Namespace):
+def main(args):
     dir_source = args.s
     dir_dest = args.d
     if not dir_dest:
